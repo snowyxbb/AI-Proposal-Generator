@@ -16,14 +16,24 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "prepare": "husky"
   },
+  "lint-staged": {
+  "*.{js,jsx,ts,tsx}": [
+    "eslint",
+    "prettier --check"
+  ],
+  "*.{json,yml,yaml,md}": [
+    "prettier --check"
+  ]},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "imports": {
     "#*": "./src/*"
   },
+
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -40,6 +50,8 @@
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.8.1",
     "eslint-plugin-perfectionist": "^5.10.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "prettier": "^3.9.6",
     "tsx": "^4.23.12",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
