@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -15,105 +10,105 @@ datasource db {
 enum Role {
   USER
   ADMIN
-  MODERATOR
 }
 
 enum AuthProvider {
   LOCAL
   GOOGLE
   GITHUB
-  FACEBOOK
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  passwordHash  String?       // Nullable for OAuth-only users
-  name          String?
-  avatar        String?
-  
-  // Account status
-  isActive      Boolean       @default(true)
-  isVerified    Boolean       @default(false)
-  role          Role          @default(USER)
-  
-  // Timestamps
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  lastLoginAt   DateTime?
-  
-  // Relations
-  sessions          Session[]
+  id             String              @id @default(uuid())
+  email          String              @unique
+  passwordHash   String?
+  name           String?
+  avatar         String?
+
+  isActive       Boolean             @default(true)
+  isVerified     Boolean             @default(false)
+  role           Role                @default(USER)
+
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  lastLoginAt    DateTime?
+
+  sessions           Session[]
   verificationTokens VerificationToken[]
   passwordResets     PasswordReset[]
   oauthAccounts      OAuthAccount[]
-  
+
+  @@index([createdAt])
+  @@index([role, isActive])
+  @@index([lastLoginAt])
+
   @@map("users")
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   userId       String
   token        String   @unique
   refreshToken String?  @unique
   expiresAt    DateTime
   createdAt    DateTime @default(now())
-  
-  // Relations
+
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
-  @@index([token])
   @@index([expiresAt])
+  @@index([userId, expiresAt])
+
   @@map("sessions")
 }
 
 model VerificationToken {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
-  // Relations
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
-  @@index([token])
+  @@index([expiresAt])
+
   @@map("verification_tokens")
 }
 
 model PasswordReset {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   token     String   @unique
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
-  
-  // Relations
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
-  @@index([token])
+  @@index([expiresAt])
+  @@index([userId, used])
+
   @@map("password_resets")
 }
 
 model OAuthAccount {
-  id           String       @id @default(cuid())
+  id           String       @id @default(uuid())
   userId       String
   provider     AuthProvider
-  providerId   String       // User ID from OAuth provider
+  providerId   String
   accessToken  String?
   refreshToken String?
   expiresAt    DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  
-  // Relations
+
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([provider, providerId])
   @@index([userId])
+
   @@map("oauth_accounts")
 }
